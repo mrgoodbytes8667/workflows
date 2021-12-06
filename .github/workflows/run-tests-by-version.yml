@@ -1,0 +1,75 @@
+name: Tests By Symfony Version
+
+on:
+  workflow_call:
+    inputs:
+      setupPhpExtensions:
+        required: false
+        type: string
+        default: ''
+      phpUnitVersion:
+        required: false
+        type: string
+        default: 9.5
+      failFast:
+        required: false
+        type: boolean
+        default: false
+      bySymfonyVersion:
+        required: false
+        type: boolean
+        default: false
+      symfony:
+        required: false
+        type: string
+
+jobs:
+  test:
+    timeout-minutes: 15
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: ${{ inputs.failFast }}
+      matrix:
+        php: [ 8.0 ]
+        os: [ ubuntu-latest ]
+    env:
+      SYMFONY_PHPUNIT_VERSION: ${{ inputs.phpUnitVersion }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Variables
+        id: set-variables
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+          echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-by-symfony-version-{2}-composer-', runner.os, matrix.php, inputs.symfony) }}"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.set-variables.outputs.dir }}
+          key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ steps.set-variables.outputs.cacheKeyPath }}
+
+      - name: Setup PHP
+        if: ${{ success() }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
+          coverage: none
+
+      - name: Install dependencies
+        if: ${{ success() }}
+        env:
+          SYMFONY_REQUIRE: ${{ inputs.symfony }}.*
+        run: |
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex
+          composer config minimum-stability stable
+          composer update --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Run PHPUnit
+        if: ${{ success() }}
+        run: php vendor/bin/phpunit

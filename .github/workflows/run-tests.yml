@@ -1,0 +1,69 @@
+name: tests
+
+on:
+  workflow_call:
+    inputs:
+      setupPhpExtensions:
+        required: false
+        type: string
+        default: ''
+      phpUnitVersion:
+        required: false
+        type: string
+        default: 9.5
+      failFast:
+        required: false
+        type: boolean
+        default: false
+      preferLowest:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    timeout-minutes: 15
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: ${{ inputs.failFast }}
+      matrix:
+        php: [ 8.0 ]
+        prefer-lowest: [ false, true ]
+        os: [ ubuntu-latest ]
+    env:
+      SYMFONY_PHPUNIT_VERSION: ${{ inputs.phpUnitVersion }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Variables
+        id: set-variables
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+          if [ ${{ matrix.prefer-lowest }} == 'true' ]; then echo "::set-output name=preferLowest::--prefer-lowest"; else echo "::set-output name=preferLowest::"; fi
+          echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-composer-', runner.os, matrix.php) }}"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.set-variables.outputs.dir }}
+          key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ steps.set-variables.outputs.cacheKeyPath }}
+
+      - name: Setup PHP
+        if: ${{ success() }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
+          coverage: none
+
+      - name: Install dependencies
+        if: ${{ success() }}
+        run: composer update ${{ steps.set-variables.outputs.preferLowest }} --prefer-stable --prefer-dist --no-interaction
+
+      - name: Run PHPUnit
+        if: ${{ success() }}
+        run: php vendor/bin/phpunit
