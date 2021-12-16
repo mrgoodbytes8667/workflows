@@ -15,6 +15,10 @@ on:
         required: false
         type: boolean
         default: false
+      prerelease:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -80,4 +84,4 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
           draft: true
-          prerelease: false
+          prerelease: ${{ inputs.prerelease }}
