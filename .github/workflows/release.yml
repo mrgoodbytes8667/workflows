@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: ${{ inputs.failFast }}
       matrix:
-        php: [ 8.0 ]
+        php: [ 8.0, 8.1 ]
         prefer-lowest: [ false, true ]
         os: [ ubuntu-latest ]
     env:
