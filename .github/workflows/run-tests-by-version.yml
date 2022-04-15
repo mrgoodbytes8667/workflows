@@ -18,6 +18,10 @@ on:
       symfony:
         required: false
         type: string
+      minStability:
+        required: false
+        type: string
+        default: 'stable'
 
 jobs:
   test:
@@ -63,7 +67,7 @@ jobs:
           SYMFONY_REQUIRE: ${{ inputs.symfony }}.*
         run: |
           composer global require --no-progress --no-scripts --no-plugins symfony/flex
-          composer config minimum-stability stable
+          composer config minimum-stability ${{ inputs.minStability }}
           composer update --prefer-dist --no-interaction --optimize-autoloader
 
       - name: Run PHPUnit
