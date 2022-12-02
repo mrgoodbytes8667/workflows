@@ -45,7 +45,7 @@ jobs:
           echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-composer-', runner.os, matrix.php) }}"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.set-variables.outputs.dir }}
           key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
