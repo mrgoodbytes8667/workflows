@@ -52,6 +52,8 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
           coverage: ${{ inputs.coverageType }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         if: ${{ success() }}
