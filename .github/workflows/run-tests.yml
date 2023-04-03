@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set Variables
         id: set-variables
@@ -61,6 +63,8 @@ jobs:
       - name: Install dependencies
         if: ${{ success() }}
         run: composer update ${{ steps.set-variables.outputs.preferLowest }} --prefer-stable --prefer-dist --no-interaction
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run PHPUnit
         if: ${{ success() }}
