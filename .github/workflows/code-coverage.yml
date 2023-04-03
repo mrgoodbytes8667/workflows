@@ -67,5 +67,5 @@ jobs:
         if: ${{ success() }}
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          token: ${{ secrets.CODECOV_TOKEN }} # required for all repos
           files: ./clover.xml
