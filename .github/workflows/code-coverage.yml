@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         default: pcov
+      phpIniValues:
+        required: false
+        type: string
+        default: ''
 
 jobs:
   test:
@@ -52,6 +56,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
           coverage: ${{ inputs.coverageType }}
+          ini-values: ${{ inputs.phpIniValues }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
