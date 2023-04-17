@@ -18,6 +18,10 @@ on:
       symfony:
         required: false
         type: string
+      minStability:
+        required: false
+        type: string
+        default: 'stable'
 
 jobs:
   test:
@@ -33,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Variables
         id: set-variables
@@ -42,7 +46,7 @@ jobs:
           echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-by-symfony-version-{2}-composer-', runner.os, matrix.php, inputs.symfony) }}"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.set-variables.outputs.dir }}
           key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
@@ -56,6 +60,8 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
           coverage: none
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         if: ${{ success() }}
