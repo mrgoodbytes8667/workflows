@@ -15,6 +15,14 @@ on:
         required: false
         type: string
         default: pcov
+      phpIniValues:
+        required: false
+        type: string
+        default: ''
+    secrets:
+      CODECOV_TOKEN:
+        description: 'Used to authorize coverage report uploads'
+        required: false
 
 jobs:
   test:
@@ -22,14 +30,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        php: [ 8.0 ]
+        php: [ 8.1 ]
         os: [ ubuntu-latest ]
     env:
       SYMFONY_PHPUNIT_VERSION: ${{ inputs.phpUnitVersion }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Variables
         id: set-variables
@@ -38,7 +46,7 @@ jobs:
           echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-coverage-composer-', runner.os, matrix.php) }}"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.set-variables.outputs.dir }}
           key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
@@ -52,6 +60,9 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
           coverage: ${{ inputs.coverageType }}
+          ini-values: ${{ inputs.phpIniValues }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         if: ${{ success() }}
@@ -65,4 +76,5 @@ jobs:
         if: ${{ success() }}
         uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }} # required for all repos
           files: ./clover.xml
