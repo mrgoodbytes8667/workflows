@@ -19,6 +19,10 @@ on:
         required: false
         type: string
         default: ''
+    secrets:
+      CODECOV_TOKEN:
+        description: 'Used to authorize coverage report uploads'
+        required: false
 
 jobs:
   test:
