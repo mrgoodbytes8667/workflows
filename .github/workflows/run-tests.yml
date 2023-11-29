@@ -10,7 +10,7 @@ on:
       phpUnitVersion:
         required: false
         type: string
-        default: 9.5
+        default: 9.6
       failFast:
         required: false
         type: boolean
@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: ${{ inputs.failFast }}
       matrix:
-        php: [ 8.1, 8.2 ]
+        php: [ 8.1, 8.2, 8.3 ]
         prefer-lowest: [ false, true ]
         os: [ ubuntu-latest ]
     env:

@@ -10,7 +10,7 @@ on:
       phpUnitVersion:
         required: false
         type: string
-        default: 9.5
+        default: 9.6
       coverageType:
         required: false
         type: string
