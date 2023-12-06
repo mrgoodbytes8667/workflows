@@ -57,7 +57,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
+          extensions: json, dom, curl, libxml, mbstring, :php-psr ${{ inputs.setupPhpExtensions }}
           coverage: none
 
       - name: Install dependencies
