@@ -3,6 +3,10 @@ name: Tests By Symfony Version
 on:
   workflow_call:
     inputs:
+      lfs:
+        required: false
+        type: boolean
+        default: false
       setupPhpExtensions:
         required: false
         type: string
@@ -18,6 +22,10 @@ on:
       symfony:
         required: false
         type: string
+      minStability:
+        required: false
+        type: string
+        default: 'stable'
 
 jobs:
   test:
@@ -33,7 +41,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          lfs: ${{ inputs.lfs }}
 
       - name: Set Variables
         id: set-variables
@@ -42,7 +52,7 @@ jobs:
           echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-by-symfony-version-{2}-composer-', runner.os, matrix.php, inputs.symfony) }}"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ steps.set-variables.outputs.dir }}
           key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
@@ -56,6 +66,8 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json, dom, curl, libxml, mbstring ${{ inputs.setupPhpExtensions }}
           coverage: none
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         if: ${{ success() }}
@@ -64,7 +76,7 @@ jobs:
         run: |
           composer global config --no-plugins allow-plugins.symfony/flex true
           composer global require --no-progress --no-scripts --no-plugins symfony/flex
-          composer config minimum-stability stable
+          composer config minimum-stability ${{ inputs.minStability }}
           composer update --prefer-dist --no-interaction --optimize-autoloader
 
       - name: Run PHPUnit
