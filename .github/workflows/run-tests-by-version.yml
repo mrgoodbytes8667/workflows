@@ -3,6 +3,10 @@ name: Tests By Symfony Version
 on:
   workflow_call:
     inputs:
+      lfs:
+        required: false
+        type: boolean
+        default: false
       setupPhpExtensions:
         required: false
         type: string
@@ -30,14 +34,16 @@ jobs:
     strategy:
       fail-fast: ${{ inputs.failFast }}
       matrix:
-        php: [ 8.1 ]
+        php: [ 8.2 ]
         os: [ ubuntu-latest ]
     env:
       SYMFONY_PHPUNIT_VERSION: ${{ inputs.phpUnitVersion }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          lfs: ${{ inputs.lfs }}
 
       - name: Set Variables
         id: set-variables
@@ -46,7 +52,7 @@ jobs:
           echo "::set-output name=cacheKeyPath::${{ format('{0}-php{1}-tests-by-symfony-version-{2}-composer-', runner.os, matrix.php, inputs.symfony) }}"
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.set-variables.outputs.dir }}
           key: ${{ steps.set-variables.outputs.cacheKeyPath }}${{ hashFiles('**/composer.lock') }}
