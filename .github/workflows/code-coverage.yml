@@ -3,6 +3,10 @@ name: Code Coverage
 on:
   workflow_call:
     inputs:
+      lfs:
+        required: false
+        type: boolean
+        default: false
       setupPhpExtensions:
         required: false
         type: string
@@ -38,6 +42,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: ${{ inputs.lfs }}
 
       - name: Set Variables
         id: set-variables
